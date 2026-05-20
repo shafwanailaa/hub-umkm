@@ -2,32 +2,31 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
+    // 1. Hubungkan model ke nama tabel asli di database .sql kalian
+    protected $table = 'admin';
+
+    // 2. Sesuaikan nama Primary Key tabel admin kalian
+    protected $primaryKey = 'id_admin';
+
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
+     * Atribut yang boleh diisi secara massal (Mass Assignable).
      */
     protected $fillable = [
-        'name',
-        'email',
+        'nama_admin',
+        'username',
         'password',
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
+     * Atribut yang harus disembunyikan demi alasan keamanan.
      */
     protected $hidden = [
         'password',
@@ -35,14 +34,11 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Beritahu Laravel bahwa field password dienkripsi otomatis (bawaan Laravel 11/12)
      */
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
     }

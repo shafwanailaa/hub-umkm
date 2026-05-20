@@ -16,7 +16,8 @@
 
     <div class="w-full max-w-md bg-white min-h-screen shadow-2xl relative flex flex-col pb-8" 
          x-data="{ 
-            cartCount: 6, 
+            // FIX 1: Reset nilai cartCount default menjadi 0 agar sinkron
+            cartCount: 0, 
             showModal: false,
             showChat: false,
             rating: 5,
@@ -43,7 +44,6 @@
             sendMessage() {
                 if(this.chatText.trim() === '') return;
                 
-                // Tambah pesan pembeli ke room chat
                 this.messages.push({
                     sender: 'pembeli',
                     text: this.chatText,
@@ -52,7 +52,6 @@
                 
                 this.chatText = '';
                 
-                // Simulasi auto-reply dari toko setelah 1 detik
                 setTimeout(() => {
                     this.messages.push({
                         sender: 'toko',
@@ -72,17 +71,30 @@
             </a>
 
             <div class="flex items-center gap-2">
-                <button @click="showChat = true" class="p-2 bg-gray-50 hover:bg-purple-50 text-gray-400 hover:text-[#9333EA] rounded-xl border border-gray-100 transition relative">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                </button>
+                @auth
+                    <button @click="showChat = true" class="p-2 bg-gray-50 hover:bg-purple-50 text-gray-400 hover:text-[#9333EA] rounded-xl border border-gray-100 transition relative">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                    </button>
+                @endauth
+
+                @guest
+                    <a href="{{ route('cart.index') }}" class="p-2 bg-gray-50 hover:bg-purple-50 text-gray-400 hover:text-[#9333EA] rounded-xl border border-gray-100 transition relative">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                    </a>
+                @endguest
                 
                 <a href="{{ route('cart.index') }}" class="p-2 bg-[#9333EA] text-white rounded-xl shadow-md shadow-purple-100 relative hover:bg-[#8227ec] transition flex items-center justify-center">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
-                    <span class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white" x-text="cartCount"></span>
+                    {{-- FIX 2: Menambahkan x-show="cartCount > 0" agar bulatan merah otomatis hilang jika jumlahnya 0 --}}
+                    @auth
+                        <span x-show="cartCount > 0" class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white" x-text="cartCount"></span>
+                    @endauth
                 </a>
             </div>
         </header>
@@ -134,9 +146,13 @@
                         <p class="text-lg font-[900] text-[#9333EA]">Rp 85.000</p>
                         <p class="text-xs font-bold text-gray-400">Stok : <span class="text-gray-700">5</span></p>
                     </div>
-                    <button @click="cartCount++" class="w-full py-3.5 bg-gradient-to-r from-[#9333EA] to-[#E879F9] text-white font-[900] text-sm rounded-xl shadow-md shadow-purple-50 hover:scale-[1.01] active:scale-95 transition-all uppercase tracking-wide">
-                        Tambah ke Keranjang
-                    </button>
+                    
+                    <form action="{{ route('cart.index') }}" method="GET">
+                        @csrf
+                        <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-[#9333EA] to-[#E879F9] text-white font-[900] text-sm rounded-xl shadow-md shadow-purple-50 hover:scale-[1.01] active:scale-95 transition-all uppercase tracking-wide">
+                            Tambah ke Keranjang
+                        </button>
+                    </form>
                 </div>
 
                 <div class="bg-white rounded-[28px] border border-gray-100 shadow-sm p-3 space-y-3">
@@ -148,18 +164,31 @@
                         <p class="text-lg font-[900] text-[#9333EA]">Rp 45.000</p>
                         <p class="text-xs font-bold text-gray-400">Stok : <span class="text-gray-700">20</span></p>
                     </div>
-                    <button @click="cartCount++" class="w-full py-3.5 bg-gradient-to-r from-[#9333EA] to-[#E879F9] text-white font-[900] text-sm rounded-xl shadow-md shadow-purple-50 hover:scale-[1.01] active:scale-95 transition-all uppercase tracking-wide">
-                        Tambah ke Keranjang
-                    </button>
+                    
+                    <form action="{{ route('cart.index') }}" method="GET">
+                        @csrf
+                        <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-[#9333EA] to-[#E879F9] text-white font-[900] text-sm rounded-xl shadow-md shadow-purple-50 hover:scale-[1.01] active:scale-95 transition-all uppercase tracking-wide">
+                            Tambah ke Keranjang
+                        </button>
+                    </form>
                 </div>
             </div>
 
             <div class="px-5 mt-8 space-y-4">
                 <div class="flex justify-between items-center">
                     <h3 class="text-2xl font-[900] text-[#9333EA] tracking-tighter">Ulasan Pelanggan</h3>
-                    <button @click="showModal = true" class="bg-gradient-to-r from-[#9333EA] to-[#E879F9] text-white px-3 py-1.5 rounded-xl text-[10px] font-black shadow-md flex items-center gap-1 active:scale-95 transition">
-                        📝 Beri Ulasan
-                    </button>
+                    
+                    @auth
+                        <button @click="showModal = true" class="bg-gradient-to-r from-[#9333EA] to-[#E879F9] text-white px-3 py-1.5 rounded-xl text-[10px] font-black shadow-md flex items-center gap-1 active:scale-95 transition">
+                            📝 Beri Ulasan
+                        </button>
+                    @endauth
+
+                    @guest
+                        <a href="{{ route('cart.index') }}" class="bg-gradient-to-r from-[#9333EA] to-[#E879F9] text-white px-3 py-1.5 rounded-xl text-[10px] font-black shadow-md flex items-center gap-1 active:scale-95 transition">
+                            📝 Beri Ulasan
+                        </a>
+                    @endguest
                 </div>
 
                 <div class="space-y-3">

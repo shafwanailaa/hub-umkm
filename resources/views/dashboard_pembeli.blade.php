@@ -42,7 +42,10 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
-                    <span class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">1</span>
+                    {{-- FIX SINKRONISASI: Tag angka statis dinonaktifkan sepenuhnya agar selaras dengan keranjang baru yang kosong --}}
+                    @auth
+                        {{-- <span class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">0</span> --}}
+                    @endauth
                 </a>
             </div>
         </header>
@@ -53,6 +56,12 @@
                 <h2 class="text-3xl font-[900] text-[#9333EA] tracking-tight leading-none">Jelajahi Toko UMKM</h2>
                 <p class="text-xs font-bold text-gray-400 leading-tight">Dukung UMKM Indonesia dengan berbelanja langsung dari pemilik usaha</p>
             </div>
+
+            @if(session('warning'))
+                <div class="p-4 mb-4 text-sm text-amber-800 rounded-2xl bg-amber-50 border border-amber-100 font-medium animate-pulse">
+                    {{ session('warning') }}
+                </div>
+            @endif
 
             <div class="space-y-6">
 
@@ -68,7 +77,7 @@
 
                     <div class="px-1 space-y-2">
                         <h3 class="text-xl font-[900] text-gray-800 tracking-tight">Rumah Anyaman</h3>
-                        <p class="text-xs font-medium text-gray-400 leading-relaxed">Rumah Anyaman menyediakan berbagai kerajinan anyaman berkualitas dengan desain tradisional dan modern. Tersedia koleksi dekorasi rumah, tas, souvenir, dan perlengkapan handmade dengan harga terjangkau.</p>
+                        <p class="text-xs font-medium text-gray-400 leading-relaxed">Rumah Anyaman menyediakan berbagai kerajinan anyaman berkualitas dengan desain tradisional and modern. Tersedia koleksi dekorasi rumah, tas, souvenir, and perlengkapan handmade dengan harga terjangkau.</p>
                         
                         <div class="flex items-center gap-4 text-xs pt-1">
                             <div class="flex items-center gap-1 text-gray-700 font-bold">
@@ -103,7 +112,7 @@
 
                     <div class="px-1 space-y-2">
                         <h3 class="text-xl font-[900] text-gray-800 tracking-tight">Santapan Mantap</h3>
-                        <p class="text-xs font-medium text-gray-400 leading-relaxed">Santapan Mantap menyajikan berbagai pilihan makanan lezat dengan cita rasa khas dan harga terjangkau. Tersedia menu makanan rumahan, camilan, hingga hidangan kekinian yang cocok dinikmati bersama keluarga dan teman.</p>
+                        <p class="text-xs font-medium text-gray-400 leading-relaxed">Santapan Mantap menyajikan berbagai pilihan makanan lezat dengan cita rasa khas and harga terjangkau. Tersedia menu makanan rumahan, camilan, hingga hidangan kekinian yang cocok dinikmati bersama keluarga and teman.</p>
                         
                         <div class="flex items-center gap-4 text-xs pt-1">
                             <div class="flex items-center gap-1 text-gray-700 font-bold">
@@ -138,7 +147,7 @@
 
                     <div class="px-1 space-y-2">
                         <h3 class="text-xl font-[900] text-gray-800 tracking-tight">Roemah Rotan</h3>
-                        <p class="text-xs font-medium text-gray-400 leading-relaxed">Roemah Rotan menghadirkan berbagai kerajinan rotan berkualitas dengan sentuhan tradisional dan modern. Tersedia furniture, dekorasi rumah, tas, dan aksesoris handmade yang elegan dengan harga terjangkau.</p>
+                        <p class="text-xs font-medium text-gray-400 leading-relaxed">Roemah Rotan menghadirkan berbagai kerajinan rotan berkualitas dengan sentuhan tradisional and modern. Tersedia furniture, dekorasi rumah, tas, and aksesoris handmade yang elegan dengan harga terjangkau.</p>
                         
                         <div class="flex items-center gap-4 text-xs pt-1">
                             <div class="flex items-center gap-1 text-gray-700 font-bold">

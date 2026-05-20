@@ -21,23 +21,20 @@
                 </svg>
             </div>
             <h2 class="text-2xl font-[900] text-[#9333EA] tracking-tighter mb-1">HubUMKM</h2>
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest text-center">Mulai kelola bisnis Anda hari ini</p>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest text-center">Mulai kelola bisnis Anda hari ini (Penjual)</p>
         </div>
 
         <form method="POST" action="{{ route('login') }}" class="space-y-6">
             @csrf
 
             <div>
-                <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Email</label>
-                <input type="email" name="email" value="lintangkejora@gmail.com" required class="w-full px-5 py-4 rounded-2xl bg-gray-50 border border-gray-100 outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all font-bold text-gray-800">
+                <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Username / Email</label>
+                <input type="text" name="email" required class="w-full px-5 py-4 rounded-2xl bg-gray-50 border border-gray-100 outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all font-bold text-gray-800">
             </div>
 
             <div class="relative">
                 <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Password</label>
                 <input type="password" name="password" required class="w-full px-5 py-4 rounded-2xl bg-gray-50 border border-gray-100 outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all font-bold text-gray-800">
-                <div class="absolute right-5 top-[46px] text-gray-400 cursor-pointer hover:text-[#9333EA] transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                </div>
             </div>
 
             <div class="flex items-center justify-between px-1">
@@ -49,7 +46,7 @@
             </div>
 
             <button type="submit" class="w-full py-4 bg-gradient-to-r from-[#9333EA] to-[#E879F9] text-white font-[900] rounded-2xl shadow-xl shadow-purple-100 hover:scale-[1.02] active:scale-95 transition-all">
-                LOGIN
+                LOGIN PENJUAL
             </button>
 
             <div class="relative flex items-center py-4">
@@ -58,10 +55,10 @@
                 <div class="flex-grow border-t border-gray-100"></div>
             </div>
 
-            <button type="button" class="w-full py-4 bg-white border border-gray-100 text-gray-800 font-black rounded-2xl flex items-center justify-center gap-3 hover:bg-gray-50 transition-all active:scale-95">
+            <a href="{{ route('auth.google', ['role' => 'penjual']) }}" class="w-full py-4 bg-white border border-gray-100 text-gray-800 font-black rounded-2xl flex items-center justify-center gap-3 hover:bg-gray-50 transition-all active:scale-95 shadow-sm">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5">
-                GOOGLE
-            </button>
+                MASUK DENGAN GOOGLE
+            </a>
         </form>
 
         <p class="text-center mt-8 text-sm font-bold text-gray-400">
