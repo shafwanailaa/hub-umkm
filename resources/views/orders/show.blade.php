@@ -16,10 +16,12 @@
 
     @php
         $primaryKeyPesanan = $pesanan->id_pesanan ?? $pesanan->id ?? 1;
+        
+        // PASTIKAN BARIS INI MENGGUNAKAN strtolower AGAR COCOK DENGAN ALPINE.JS
         $statusSekarang = strtolower($pesanan->status_pesanan ?? $pesanan->status ?? 'pending');
     @endphp
 
-    <div class="w-full max-w-md bg-white min-h-screen shadow-2xl relative flex flex-col" x-data="{ status: '{{ $statusSekarang }}' }">
+   <div class="w-full max-w-md bg-white min-h-screen shadow-2xl relative flex flex-col" x-data="{ status: '{{ $statusSekarang }}' }">
         
         <header class="bg-white border-b border-gray-100 px-6 py-5 flex justify-between items-center sticky top-0 z-40">
             <h2 class="text-2xl font-[900] text-[#9333EA] tracking-tighter leading-none">Detail Pesanan</h2>
