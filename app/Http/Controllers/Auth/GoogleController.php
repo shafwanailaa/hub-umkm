@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\User; 
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,68 +15,68 @@ use Illuminate\Auth\Events\Registered;
 
 class GoogleController extends Controller
 {
-    /**
-     * Mengarahkan pengguna ke halaman login milik Google berdasarkan role penekan tombol.
-     */
     public function redirectToGoogle(Request $request): RedirectResponse
     {
-        // Tangkap parameter role dari tombol (penjual atau pembeli)
         $role = $request->query('role', 'pembeli');
-        
-        // Simpan tipe role ke dalam session agar tidak hilang saat pergi ke server Google
         session(['google_auth_role' => $role]);
 
         return Socialite::driver('google')->redirect();
     }
 
-    /**
-     * Menangkap data pengguna dari Google setelah sukses login.
-     */
     public function handleGoogleCallback(): RedirectResponse
     {
         try {
             $googleUser = Socialite::driver('google')->user();
-            
-            // Ambil kembali data role yang tadi disimpan di session (default: pembeli)
             $authRole = session('google_auth_role', 'pembeli');
             
-            if ($authRole === 'penjual') {
-                // --- JALUR PENJUAL / ADMIN (Tabel admin) ---
-                $findAdmin = User::where('username', $googleUser->email)->first();
+            // 🌟 PERBAIKAN 1: Cari user menggunakan kolom 'username' (bukan 'email')
+            $user = User::where('username', $googleUser->email)->first();
 
-                if ($findAdmin) {
-                    Auth::login($findAdmin);
-                    
-                    // Cek jika belum verifikasi email inbox
-                    if (is_null($findAdmin->email_verified_at)) {
-                        return redirect()->route('verification.notice');
-                    }
-                    return redirect()->intended(route('dashboard'));
-                } else {
-                    // Daftarkan Admin Baru (Belum Terverifikasi)
-                    $newAdmin = User::create([
-                        'nama_admin' => $googleUser->name,
-                        'username'   => $googleUser->email,
-                        'password'   => Hash::make(Str::random(24)),
-                    ]);
+            if ($user) {
+                Auth::login($user);
 
-                    // Pemicu event Laravel untuk mengirim email verifikasi ke inbox
-                    event(new Registered($newAdmin));
-
-                    Auth::login($newAdmin);
+                if (is_null($user->email_verified_at)) {
                     return redirect()->route('verification.notice');
                 }
+
+                return $this->redirectBasedOnDataCompleteness($user);
+
             } else {
-                // --- JALUR PEMBILI (Menggunakan fallback session / simulasi proteksi) ---
-                // Untuk pembeli, arahkan ke rute jelajah toko dengan session terautentikasi
-                session(['pembeli_logged_in' => true, 'pembeli_name' => $googleUser->name]);
-                return redirect()->route('dashboard.pembeli');
+                // 🌟 PERBAIKAN 2: Gunakan kolom 'nama_admin' dan 'username' sesuai struktur DB kalian
+                $newUser = User::create([
+                    'nama_admin' => $googleUser->name,  // Target MySQL: nama_admin
+                    'username'   => $googleUser->email, // Target MySQL: username
+                    'role'       => $authRole, 
+                    'password'   => Hash::make(Str::random(24)),
+                ]);
+
+                event(new Registered($newUser));
+
+                Auth::login($newUser);
+
+                return redirect()->route('verification.notice');
             }
 
         } catch (Exception $e) {
-            return redirect('/')->withErrors([
-                'email' => 'Gagal masuk menggunakan akun Google, silakan coba lagi.',
+            // Jika mau debug eror aslinya pas develop, bisa matikan redirect ini dan gunakan: dd($e->getMessage());
+            return redirect('/login')->withErrors([
+                'email' => 'Gagal masuk menggunakan akun Google. Eror: ' . $e->getMessage(),
             ]);
+        }
+    }
+
+    private function redirectBasedOnDataCompleteness($user): RedirectResponse
+    {
+        if ($user->role === 'penjual') {
+            if (is_null($user->nama_toko)) {
+                return redirect()->route('profile.complete.penjual');
+            }
+            return redirect()->intended(route('dashboard'));
+        } else {
+            if (is_null($user->alamat) || is_null($user->no_hp)) {
+                return redirect()->route('profile.complete.pembeli');
+            }
+            return redirect()->intended(route('dashboard.pembeli'));
         }
     }
 }

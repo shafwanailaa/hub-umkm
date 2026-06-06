@@ -11,12 +11,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // SEMUA ALIAS MIDDLEWARE DISATUKAN DI SINI AGAR TIDAK BENTROK
+        
+        // 🌟 TAMBAHKAN BARIS INI UNTUK MENDAFTARKAN MIDDLEWARE ROLE
         $middleware->alias([
-            'auth.pembeli' => \App\Http\Middleware\EnsureUserIsLoggedIn::class,
-            'role'         => \App\Http\Middleware\CheckRole::class,
+            'role' => \App\Http\Middleware\CheckRole::class, // Sesuaikan dengan nama file middleware role di proyekmu, biasanya CheckRole atau RoleMiddleware
         ]);
+
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
+    ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();

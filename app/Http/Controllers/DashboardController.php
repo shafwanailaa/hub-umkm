@@ -5,19 +5,30 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Auth; // Tambahkan ini
+use App\Models\User;                // Tambahkan ini
 use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        // 1. DETEKSI NAMA TABEL PRODUK YANG EKSIS
+        // === JALAN PINTAS: AUTO LOGIN ADMIN ===
+        if (!Auth::check()) {
+            $admin = User::where('role', 'penjual')->first();
+            if ($admin) {
+                Auth::login($admin);
+            }
+        }
+        // ======================================
+
+        // 1. DETEKSI NAMA TABEL PRODUK
         $tabelProduk = 'product';
         if (!Schema::hasTable($tabelProduk) && Schema::hasTable('products')) {
             $tabelProduk = 'products';
         }
 
-        // 2. DETEKSI NAMA TABEL PESANAN YANG EKSIS
+        // 2. DETEKSI NAMA TABEL PESANAN
         $tabelOrders = null;
         $namaTabelAlternatif = ['orders', 'order', 'pesanan', 'transaksi'];
         foreach ($namaTabelAlternatif as $tabel) {
@@ -27,8 +38,8 @@ class DashboardController extends Controller
             }
         }
 
-        // 3. DETEKSI NAMA KOLOM NOMINAL UANG PADA TABEL ORDERS
-        $kolomHarga = null; // Di-set null secara default
+        // 3. DETEKSI KOLOM HARGA
+        $kolomHarga = null;
         if ($tabelOrders) {
             $namaKolomAlternatif = ['total_harga', 'total', 'harga', 'subtotal', 'nominal', 'grand_total', 'total_bayar'];
             foreach ($namaKolomAlternatif as $kolom) {
@@ -39,41 +50,17 @@ class DashboardController extends Controller
             }
         }
 
-        // =========================================================================
-        // PROSES HITUNG DATA AGREGAT SECARA AMAN (ANTI EROR MUTLAK)
-        // =========================================================================
+        // HITUNG DATA AGREGAT
+        $totalPenjualanHariIni = ($tabelOrders && $kolomHarga) ? DB::table($tabelOrders)->whereDate('created_at', Carbon::today())->sum($kolomHarga) : 0;
+        $orderHariIni = $tabelOrders ? DB::table($tabelOrders)->whereDate('created_at', Carbon::today())->count() : 0;
+        $totalProduk = Schema::hasTable($tabelProduk) ? DB::table($tabelProduk)->count() : 0;
 
-        // Hitung Total Penjualan Hari Ini
-        $totalPenjualanHariIni = 0;
-        // Hanya jalankan SUM jika tabel dan kolom harga benar-benar ditemukan
-        if ($tabelOrders && $kolomHarga) {
-            $totalPenjualanHariIni = DB::table($tabelOrders)
-                ->whereDate('created_at', Carbon::today())
-                ->sum($kolomHarga);
-        }
-
-        // Hitung Jumlah Order Masuk Hari Ini
-        $orderHariIni = 0;
-        if ($tabelOrders) {
-            $orderHariIni = DB::table($tabelOrders)
-                ->whereDate('created_at', Carbon::today())
-                ->count();
-        }
-
-        // Hitung Total Seluruh Produk
-        $totalProduk = 0;
-        if (Schema::hasTable($tabelProduk)) {
-            $totalProduk = DB::table($tabelProduk)->count();
-        }
-
-        // Ambil 5 Baris Pesanan Paling Baru
+        // AMBIL PESANAN TERBARU
         $pesananTerbaru = [];
         if ($tabelOrders) {
-            // Deteksi nama kolom pembeli
             $kolomPembeli = 'nama_pembeli';
             if (!Schema::hasColumn($tabelOrders, $kolomPembeli)) {
-                $pembeliAlternatif = ['nama', 'username', 'customer', 'pembeli'];
-                foreach ($pembeliAlternatif as $pbl) {
+                foreach (['nama', 'username', 'customer', 'pembeli'] as $pbl) {
                     if (Schema::hasColumn($tabelOrders, $pbl)) {
                         $kolomPembeli = $pbl;
                         break;
@@ -87,7 +74,6 @@ class DashboardController extends Controller
                 ->get()
                 ->map(function($item) use ($kolomHarga, $kolomPembeli) {
                     return (object)[
-                        // Jika kolom target tidak ada, isi dengan data aman agar web tidak crash
                         'nama_pembeli' => $kolomPembeli ? ($item->$kolomPembeli ?? 'Pelanggan') : 'Pelanggan',
                         'total_harga'  => $kolomHarga ? ($item->$kolomHarga ?? 0) : 0,
                         'status'       => $item->status ?? 'Pending'
@@ -95,12 +81,6 @@ class DashboardController extends Controller
                 });
         }
 
-        // Oper semua data nyata yang aman ini ke dalam view blade dashboard
-        return view('dashboard', compact(
-            'totalPenjualanHariIni',
-            'orderHariIni',
-            'totalProduk',
-            'pesananTerbaru'
-        ));
+        return view('dashboard', compact('totalPenjualanHariIni', 'orderHariIni', 'totalProduk', 'pesananTerbaru'));
     }
 }

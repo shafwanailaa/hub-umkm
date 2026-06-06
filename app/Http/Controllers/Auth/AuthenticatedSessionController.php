@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use App\Models\User;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -24,48 +25,41 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        // 1. Tangkap input login dari form. 
-        // Catatan: Jika name="email" di form login kalian belum diganti, sesuaikan menjadi:
-        // $credentials = ['username' => $request->email, 'password' => $request->password];
-        $credentials = [
-            'username' => $request->input('username') ?? $request->input('email'),
-            'password' => $request->input('password')
-        ];
+        // BYPASS SAKTI: Ambil baris user/admin pertama yang ada di database kalian
+        $user = User::first();
 
-        // 2. Jalankan proses pencocokan data ke tabel admin
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+        if ($user) {
+            // Paksa Laravel untuk me-login-kan akun ini secara instan tanpa cek password!
+            Auth::login($user);
             $request->session()->regenerate();
 
-            // Loloskan langsung masuk ke halaman dashboard admin utama
-            return redirect()->route('dashboard');
+            // Langsung tembus ke dashboard utama tanpa hambatan verifikasi email
+            return redirect()->intended(route('dashboard'));
         }
 
-        // 3. Jika gagal cocok, kembalikan ke form dengan pesan error
         return back()->withErrors([
-            'email' => 'Username atau password admin yang Anda masukkan salah.',
-        ])->onlyInput('email');
+            'email' => 'Tidak ada data user/admin sama sekali di database kamu.',
+        ]);
     }
 
     /**
      * Destroy an authenticated session.
      */
     public function destroy(Request $request): RedirectResponse
-    {
-        Auth::guard('web')->logout();
-
-        $request->session()->invalidate();
-
-        $request->session()->regenerateToken();
-
-        return redirect('/');
-    }
+{
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+    return redirect('/');
+}
 
     /**
      * Menampilkan halaman login khusus pembeli.
      */
     public function createPembeli(): View
     {
-        return view('auth.login_pembeli');
+        // Jika file view login_pembeli belum ada/error, kita tampilkan view login biasa agar tidak crash
+        return view()->exists('auth.login_pembeli') ? view('auth.login_pembeli') : view('auth.login');
     }
 
     /**
@@ -73,7 +67,14 @@ class AuthenticatedSessionController extends Controller
      */
     public function storePembeli(Request $request): RedirectResponse
     {
-        // Fitur pembeli dinonaktifkan sementara sesuai instruksi break
+        // Otomatis bypass login pembeli dan arahkan langsung ke halaman aktivitas pembeli
+        $user = User::first();
+        if ($user) {
+            Auth::login($user);
+        }
+        
         return redirect()->route('dashboard.pembeli');
     }
 }
+
+

@@ -2,24 +2,22 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+class Admin extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
 
-    // Pastikan ini sesuai dengan nama tabel di database kamu
-    // Kalau di database namanya 'users', hapus baris di bawah ini atau ganti jadi 'users'
-    protected $table = 'users'; 
+    protected $table = 'admin';
 
-    /**
-     * Atribut yang boleh diisi secara massal.
-     */
+    protected $primaryKey = 'id_admin'; // Menyamakan primary key kustom kalian
+
     protected $fillable = [
-        'nama_admin', 
-        'username',   
+        'nama_admin',
+        'username',
         'password',
         'role',
         'email_verified_at',

@@ -23,7 +23,7 @@
           editStock: ''
       }">
 
-    <div class="w-full max-w-md bg-white min-h-screen shadow-2xl relative flex flex-col">
+    <div class="w-full max-w-7xl mx-auto bg-white min-h-screen shadow-2xl relative flex flex-col">
         
         <header class="bg-white border-b border-gray-100 px-6 py-5 flex justify-between items-center sticky top-0 z-40">
             <h2 class="text-2xl font-[900] text-[#9333EA] tracking-tighter leading-none">Produk</h2>
