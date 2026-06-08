@@ -66,10 +66,8 @@
                 <div class="subtitle">HubUMKM</div>
             </td>
             <td style="text-align: right; vertical-align: middle;">
-                <div style="background-color: #9333EA; width: 40px; height: 40px; border-radius: 10px; text-align: center;">
-                    <span style="color: white; font-size: 22px; font-weight: bold; line-height: 38px;">🏪</span>
-                </div>
-            </td>
+    <img src="{{ $logoBase64 }}" alt="Logo HubUMKM" style="width: 120px; height: auto; object-fit: contain;">
+</td>
         </tr>
     </table>
 
