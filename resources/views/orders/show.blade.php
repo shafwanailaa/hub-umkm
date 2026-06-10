@@ -21,7 +21,8 @@
         $statusSekarang = strtolower($pesanan->status_pesanan ?? $pesanan->status ?? 'pending');
     @endphp
 
-   <div class="w-full max-w-md bg-white min-h-screen shadow-2xl relative flex flex-col" x-data="{ status: '{{ $statusSekarang }}' }">
+   <div class="w-full max-w-md bg-white min-h-screen shadow-2xl relative flex flex-col" 
+     x-data="{ status: '{{ strtolower($pesanan->status_pesanan ?? $pesanan->status ?? 'pending') }}' }">
         
         <header class="bg-white border-b border-gray-100 px-6 py-5 flex justify-between items-center sticky top-0 z-40">
             <h2 class="text-2xl font-[900] text-[#9333EA] tracking-tighter leading-none">Detail Pesanan</h2>
@@ -105,15 +106,16 @@
 
                 <div class="grid grid-cols-2 gap-4">
                     <form action="{{ route('orders.update-status', $primaryKeyPesanan) }}" method="POST">
-                        @csrf
-                        @method('PUT')
-                        <input type="hidden" name="status" value="Pending">
-                        <button type="submit" 
-                                :class="status === 'pending' ? 'bg-gradient-to-r from-[#9333EA] to-[#E879F9] text-white shadow-purple-200' : 'bg-gray-100 text-gray-400'" 
-                                class="w-full py-4 rounded-2xl font-black text-sm shadow-md transition cursor-pointer">
-                            Pending
-                        </button>
-                    </form>
+    @csrf
+    @method('PUT')
+    <input type="hidden" name="status" value="Diproses"> 
+    
+    <button type="submit" 
+            :class="status === 'diproses' ? 'bg-gradient-to-r from-[#9333EA] to-[#E879F9] text-white shadow-purple-200' : 'bg-gray-100 text-gray-400'" 
+            class="w-full py-4 rounded-2xl font-black text-sm shadow-md transition cursor-pointer">
+        Diproses
+    </button>
+</form>
                     
                     <form action="{{ route('orders.update-status', $primaryKeyPesanan) }}" method="POST">
                         @csrf

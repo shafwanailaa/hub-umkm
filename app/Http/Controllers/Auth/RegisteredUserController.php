@@ -1,81 +1,60 @@
 <?php
-
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Http\RedirectResponse;
+use App\Models\Pembeli; // Tambahkan baris ini!
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
-use Illuminate\View\View;
+use Illuminate\Auth\Events\Registered;
 
 class RegisteredUserController extends Controller
 {
-    /**
-     * Display the registration view for Penjual/UMKM.
-     */
-    public function create(): View
-    {
-        return view('auth.register');
+    // --- PENJUAL ---
+    public function createPenjual() {
+        return view('auth.register_penjual'); // Pastikan file view ini ada
     }
 
-    /**
-     * Handle an incoming registration request for Penjual/UMKM (Tabel admin).
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     */
-    public function store(Request $request): RedirectResponse
-    {
-        // 1. Validasi input dengan mengecek keunikan data pada kolom 'username' di tabel 'admin'
+    public function storePenjual(Request $request) {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:admin,username'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'confirmed'],
         ]);
 
-        // 2. Simpan data baru sesuai dengan struktur kolom asli tabel admin kalian
         $user = User::create([
-            'nama_admin' => $request->name,       // Kolom target di MySQL: nama_admin
-            'username'   => $request->email,      // Kolom target di MySQL: username (diisi email)
-            'password'   => Hash::make($request->password),
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'penjual', // Menandai user sebagai penjual
         ]);
 
         event(new Registered($user));
+        auth()->login($user);
 
-        Auth::login($user);
-
-        return redirect(route('dashboard', absolute: false));
+        return redirect()->route('profile.complete.penjual'); // Lanjut lengkapi data bisnis
     }
 
-    /**
-     * Display the registration view for Pembeli.
-     */
-    public function createPembeli(): View
-    {
+    // --- PEMBELI ---
+    public function createPembeli() {
         return view('auth.register_pembeli');
     }
 
-    /**
-     * Handle an incoming registration request for Pembeli.
-     */
-    public function storePembeli(Request $request): RedirectResponse
-    {
+    public function storePembeli(Request $request) {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:admin,username'],
-            'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'confirmed'],
         ]);
 
-        // Simulasi / Implementasi penyimpanan akun pembeli menggunakan session
-        session([
-            'pembeli_logged_in' => true,
-            'pembeli_name' => $request->name,
-            'pembeli_email' => $request->email
-        ]);
+       $user = Pembeli::create([
+    'nama_customer' => $request->name, // Sesuai kolom di database
+    'email'         => $request->email,
+    'password'      => Hash::make($request->password),
+]);
 
-        return redirect()->route('dashboard.pembeli')->with('success', 'Akun pembeli berhasil didaftarkan!');
+        auth()->login($user);
+        return redirect()->route('dashboard.pembeli');
     }
 }
+

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Workspace - HubUMKM</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #FDFDFC; }
@@ -12,37 +13,50 @@
 </head>
 <body class="flex justify-center min-h-screen">
 
-    <div class="w-full max-w-7xl bg-white shadow-2xl min-h-screen flex flex-col relative">
+    <div x-data="{ tab: 'catatan', openModal: false }" class="w-full max-w-7xl bg-white shadow-2xl min-h-screen flex flex-col relative pb-24">
         
         <header class="border-b border-gray-100 px-6 py-6 flex justify-between items-center bg-white sticky top-0 z-40">
             <h1 class="text-2xl sm:text-3xl font-[900] text-[#9333EA] tracking-tighter">Workspace</h1>
-            @auth
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="text-gray-400 font-bold hover:text-red-500 transition">Logout</button>
             </form>
-            @endauth
         </header>
 
         <main class="p-6 sm:p-8 flex-grow space-y-6">
-            
             <div class="flex p-1 bg-gray-100 rounded-2xl w-full">
-                <button class="flex-1 py-3 text-sm font-bold bg-white text-purple-600 rounded-xl shadow-sm">Catatan</button>
-                <button class="flex-1 py-3 text-sm font-bold text-gray-500">Tasks</button>
+                <button @click="tab = 'catatan'" 
+                        :class="tab === 'catatan' ? 'bg-white text-purple-600 shadow-sm' : 'text-gray-500'"
+                        class="flex-1 py-3 text-sm font-bold rounded-xl transition">Catatan</button>
+                <button @click="tab = 'tasks'" 
+                        :class="tab === 'tasks' ? 'bg-white text-purple-600 shadow-sm' : 'text-gray-500'"
+                        class="flex-1 py-3 text-sm font-bold rounded-xl transition">Tasks</button>
             </div>
 
-            <button class="w-full py-4 bg-gradient-to-r from-[#9333EA] to-[#E879F9] text-white font-[900] rounded-2xl shadow-lg hover:opacity-90 transition">
-                + Tambah Catatan
+            <button @click="openModal = true" 
+                    class="w-full py-4 bg-gradient-to-r from-[#9333EA] to-[#E879F9] text-white font-[900] rounded-2xl shadow-lg hover:opacity-90 transition">
+                + Tambah <span x-text="tab === 'catatan' ? 'Catatan' : 'Task'"></span>
             </button>
 
-            <div class="w-full border-2 border-dashed border-gray-200 rounded-[32px] p-8 flex flex-col items-center justify-center min-h-[300px] text-center">
-                <div class="bg-orange-50 p-6 rounded-full mb-4">
-                    <svg class="w-10 h-10 text-orange-400" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"/></svg>
-                </div>
+            <div x-show="tab === 'catatan'" class="w-full border-2 border-dashed border-gray-200 rounded-[32px] p-8 min-h-[300px] text-center">
                 <p class="text-gray-400 font-bold">Belum ada catatan</p>
+            </div>
+            <div x-show="tab === 'tasks'" class="w-full border-2 border-dashed border-gray-200 rounded-[32px] p-8 min-h-[300px] text-center">
+                <p class="text-gray-400 font-bold">Belum ada tasks</p>
             </div>
         </main>
 
+        <div x-show="openModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div @click.away="openModal = false" class="bg-white rounded-[32px] p-8 w-full max-w-sm shadow-2xl">
+                <h3 class="text-xl font-black text-purple-700 mb-4" x-text="'Tambah ' + (tab === 'catatan' ? 'Catatan' : 'Task')"></h3>
+                
+                <form action="{{ route('workspace.storeNote') }}" method="POST">
+                    @csrf
+                    <input type="text" name="content" class="w-full p-3 border rounded-xl mb-4" placeholder="Tulis sesuatu..." required>
+                    <button type="submit" class="w-full py-3 bg-purple-600 text-white font-bold rounded-xl hover:bg-purple-700 transition">Simpan</button>
+                </form>
+            </div>
+        </div>
          <!-- Navbar bawah tetap terjaga untuk mobile-responsif -->
         <nav class="fixed bottom-0 w-full max-w-7xl bg-white border-t border-gray-100 z-50 px-8 py-4 flex justify-between items-center h-20 shadow-[0_-10px_30px_rgba(0,0,0,0.03)]">
             <!-- Isi nav tetap sama, hanya sesuaikan padding -->
@@ -72,7 +86,7 @@
             </a>
         </nav>
     </div>
-
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 </html>
     

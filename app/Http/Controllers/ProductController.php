@@ -15,13 +15,14 @@ class ProductController extends Controller
     {
         $daftarProduk = [];
         if (Schema::hasTable($this->tabel)) {
-            $daftarProduk = DB::table($this->tabel)->get();
+            $daftarProduk = DB::table($this->tabel)->orderBy('created_at', 'desc')->get();
         }
         return view('products.index', compact('daftarProduk'));
     }
 
     public function store(Request $request)
     {
+        // Pastikan name atribut di form sesuai dengan 'name', 'price', 'stock', 'image'
         $request->validate([
             'name'  => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
@@ -34,39 +35,24 @@ class ProductController extends Controller
             $pathGambar = $request->file('image')->store('products', 'public');
         }
 
-        // DISELARASKAN DENGAN DATABASE ASLI KAMU
-        $kolomNama  = 'nama_produk';
-        $kolomHarga = 'harga';
-        $kolomStok  = 'stok';
-        $kolomFoto  = 'foto_produk'; // <--- KUNCI UTAMA SINKRONISASI
-
         $dataInsert = [
-            $kolomNama  => $request->name,
-            $kolomHarga => $request->price,
-            $kolomStok  => $request->stock,
-            'created_at' => now(),
-            'updated_at' => now(),
+            'nama_produk' => $request->name,
+            'harga'       => $request->price,
+            'stok'        => $request->stock,
+            'foto_produk' => $pathGambar,
+            'created_at'  => now(),
+            'updated_at'  => now(),
         ];
 
-        if (Schema::hasColumn($this->tabel, $kolomFoto)) {
-            $dataInsert[$kolomFoto] = $pathGambar;
-        }
-
-        // Pengaman Relasi id_kategori
+        // Pengaman Relasi Kategori agar tidak eror
         if (Schema::hasColumn($this->tabel, 'id_kategori')) {
             $kategori = DB::table('kategori')->first();
-            if ($kategori) {
-                $dataInsert['id_kategori'] = $kategori->id_kategori;
-            } else {
-                $idCat = DB::table('kategori')->insertGetId([
-                    'nama_kategori' => 'Umum', 'created_at' => now(), 'updated_at' => now()
-                ]);
-                $dataInsert['id_kategori'] = $idCat;
-            }
+            $dataInsert['id_kategori'] = $kategori ? $kategori->id_kategori : null;
         }
 
         DB::table($this->tabel)->insert($dataInsert);
-        return redirect()->route('products.index')->with('success', 'Produk baru berhasil ditambahkan!');
+
+        return redirect()->route('products.index')->with('success', 'Produk berhasil ditambahkan!');
     }
 
     public function update(Request $request, $id)
@@ -84,12 +70,7 @@ class ProductController extends Controller
             return redirect()->route('products.index')->with('error', 'Produk tidak ditemukan!');
         }
 
-        $kolomNama  = 'nama_produk';
-        $kolomHarga = 'harga';
-        $kolomStok  = 'stok';
-        $kolomFoto  = 'foto_produk';
-
-        $pathGambar = $produk->$kolomFoto ?? null;
+        $pathGambar = $produk->foto_produk;
         if ($request->hasFile('image')) {
             if ($pathGambar) {
                 Storage::disk('public')->delete($pathGambar);
@@ -97,19 +78,15 @@ class ProductController extends Controller
             $pathGambar = $request->file('image')->store('products', 'public');
         }
 
-        $dataUpdate = [
-            $kolomNama  => $request->name,
-            $kolomHarga => $request->price,
-            $kolomStok  => $request->stock,
-            'updated_at' => now(),
-        ];
+        DB::table($this->tabel)->where('id_produk', $id)->update([
+            'nama_produk' => $request->name,
+            'harga'       => $request->price,
+            'stok'        => $request->stock,
+            'foto_produk' => $pathGambar,
+            'updated_at'  => now(),
+        ]);
 
-        if (Schema::hasColumn($this->tabel, $kolomFoto)) {
-            $dataUpdate[$kolomFoto] = $pathGambar;
-        }
-
-        DB::table($this->tabel)->where('id_produk', $id)->update($dataUpdate);
-        return redirect()->route('products.index')->with('success', 'Data produk berhasil diperbarui!');
+        return redirect()->route('products.index')->with('success', 'Produk diperbarui!');
     }
 
     public function destroy($id)
@@ -117,13 +94,13 @@ class ProductController extends Controller
         $produk = DB::table($this->tabel)->where('id_produk', $id)->first();
 
         if ($produk) {
-            if (!empty($produk->foto_produk)) {
+            if ($produk->foto_produk) {
                 Storage::disk('public')->delete($produk->foto_produk);
             }
             DB::table($this->tabel)->where('id_produk', $id)->delete();
-            return redirect()->route('products.index')->with('success', 'Produk berhasil dihapus!');
+            return redirect()->route('products.index')->with('success', 'Produk dihapus!');
         }
 
-        return redirect()->route('products.index')->with('error', 'Produk gagal dihapus!');
+        return redirect()->route('products.index')->with('error', 'Data tidak ditemukan!');
     }
 }

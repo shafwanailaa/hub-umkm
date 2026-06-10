@@ -18,14 +18,10 @@ class User extends Authenticatable
      * Atribut yang boleh diisi secara massal.
      */
     protected $fillable = [
-        'nama_admin', 
-        'username',   
-        'password',
-        'role',
-        'email_verified_at',
-        'nama_toko',
-        'alamat',
-        'no_hp',
+    'name',      // Tambahkan 'name'
+    'email',     // Tambahkan 'email'
+    'password',
+    'role',
     ];
 
     protected $hidden = [

@@ -16,12 +16,10 @@
 <body class="bg-[#FDFDFC] text-gray-900 antialiased flex justify-center min-h-screen">
 
     <div class="w-full max-w-7xl bg-white shadow-2xl flex flex-col min-h-screen" 
-         x-data="{ 
-            currentStatus: 'Semua',
-            orders: [
-                { id: 1, name: 'Siska Amalia', date: '27/4/2026', price: 'Rp 50.000', status: 'Pending' }
-            ]
-         }">
+     x-data="{ 
+        currentStatus: 'Semua',
+        orders: {{ json_encode($daftarPesanan) }} 
+     }">
         
         <header class="border-b border-gray-100 px-8 py-6 flex justify-between items-center">
             <h2 class="text-3xl font-[900] text-[#9333EA] tracking-tighter">Pesanan</h2>
@@ -42,22 +40,24 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <template x-for="order in orders" :key="order.id">
-                    <a :href="`/orders/${order.id}`" 
-                       x-show="currentStatus === 'Semua' || currentStatus === order.status" 
-                       class="block transition hover:scale-[1.02] active:scale-[0.98]">
-                        <div class="bg-white p-6 rounded-3xl border border-gray-50 shadow-sm hover:shadow-md transition">
-                            <div class="flex justify-between items-start mb-4">
-                                <h4 class="font-[900] text-gray-800 text-lg" x-text="order.name"></h4>
-                                <span class="bg-orange-50 text-orange-500 text-[10px] font-black px-3 py-1 rounded-lg" x-text="order.status"></span>
-                            </div>
-                            <div class="flex justify-between items-end">
-                                <p class="text-lg font-[900] text-[#9333EA]" x-text="order.price"></p>
-                                <p class="text-[11px] font-bold text-gray-300" x-text="order.date"></p>
-                            </div>
-                        </div>
-                    </a>
-                </template>
+           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <template x-for="order in orders" :key="order.id">
+        <a :href="'/orders/' + order.id" 
+           x-show="currentStatus === 'Semua' || currentStatus === order.status" 
+           class="block transition hover:scale-[1.02]">
+           
+            <div class="bg-white p-6 rounded-3xl border border-gray-50 shadow-sm">
+                <div class="flex justify-between items-start mb-4">
+                    <h4 class="font-[900] text-gray-800 text-lg" x-text="order.nama_pelanggan"></h4>
+                    <span class="bg-orange-50 text-orange-500 text-[10px] font-black px-3 py-1 rounded-lg" x-text="order.status"></span>
+                </div>
+                <div class="flex justify-between items-end">
+                    <p class="text-lg font-[900] text-[#9333EA]" x-text="'Rp ' + order.total"></p>
+                    <p class="text-[11px] font-bold text-gray-300" x-text="order.created_at"></p>
+                </div>
+            </div>
+        </a>
+    </template>
             </div>
         </main>
 

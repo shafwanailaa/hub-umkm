@@ -1,5 +1,5 @@
 <?php
-
+require __DIR__.'/auth.php';
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
@@ -13,6 +13,8 @@ use App\Http\Controllers\DashboardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+
+
 
 // --- HALAMAN UTAMA ---
 Route::get('/', function () { return view('welcome'); });
@@ -29,15 +31,23 @@ Route::post('/pembeli/login', [AuthenticatedSessionController::class, 'storePemb
 Route::get('/pembeli/register', [RegisteredUserController::class, 'createPembeli'])->name('pembeli.register');
 Route::post('/pembeli/register', [RegisteredUserController::class, 'storePembeli'])->name('pembeli.register.store');
 
-// --- REGISTER UMUM ---
-Route::get('/register', [RegisteredUserController::class, 'createPembeli'])->name('register');
+// --- REGISTER ---
+// Register Pembeli
+Route::get('/register/pembeli', [RegisteredUserController::class, 'createPembeli'])->name('register.pembeli');
+Route::post('/register/pembeli', [RegisteredUserController::class, 'storePembeli'])->name('register.pembeli.store');
 
+// Register Penjual
+Route::get('/register/penjual', [RegisteredUserController::class, 'createPenjual'])->name('register.penjual');
+Route::post('/register/penjual', [RegisteredUserController::class, 'storePenjual'])->name('register.penjual.store');
+
+// Hapus atau ganti rute '/register' lama jika masih ada agar tidak bentrok
 // --- FITUR KERANJANG ---
 Route::get('/keranjang', function () { return view('cart'); })->name('cart.index');
 Route::get('/riwayat-pesanan', function () { return view('orders_history'); })->name('orders.history');
 Route::get('/checkout', function () { return view('checkout'); })->name('checkout.index');
 
 // --- DASHBOARD ADMIN (TANPA MIDDLEWARE YANG BIKIN EROR) ---
+Route::middleware(['auth'])->group(function () {
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/profile', function () { return view('profile.index'); })->name('profile.edit');
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
@@ -55,3 +65,7 @@ Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus'])->nam
 Route::get('/lengkap-data-penjual', function () { return view('auth.complete-penjual'); })->name('profile.complete.penjual');
 Route::get('/lengkap-data-pembeli', function () { return view('auth.complete-pembeli'); })->name('profile.complete.pembeli');
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+Route::post('/workspace/store-note', [WorkspaceController::class, 'storeNote'])->name('workspace.storeNote');
+});
